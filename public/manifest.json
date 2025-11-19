@@ -1,0 +1,53 @@
+{
+  "name": "Sofa AR Viewer",
+  "short_name": "Sofa AR",
+  "description": "Preview furniture in AR and 3D directly in your space",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "categories": ["shopping", "utilities"],
+  "lang": "en-US",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "16x16 32x32 48x48",
+      "type": "image/x-icon"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "View in 3D",
+      "short_name": "3D View",
+      "description": "Open the interactive 3D viewer",
+      "url": "/viewer",
+      "icons": [
+        {
+          "src": "/favicon.ico",
+          "sizes": "16x16"
+        }
+      ]
+    },
+    {
+      "name": "Try AR",
+      "short_name": "AR Mode",
+      "description": "Experience augmented reality",
+      "url": "/ar",
+      "icons": [
+        {
+          "src": "/favicon.ico",
+          "sizes": "16x16"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/sofa-thumbnail.jpg",
+      "sizes": "900x600",
+      "type": "image/jpeg",
+      "label": "Sofa preview in AR viewer"
+    }
+  ]
+}
