@@ -1,136 +1,202 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { sofa } from "@/lib/sofa-data";
-import { getARUnsupportedMessage, isARSupported, getDeviceInfo } from "@/lib/webxr-utils";
+import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+import { sofa, formatDimensions } from "@/lib/sofa-data";
 
-export default function HomePage() {
-  const [arReady, setArReady] = useState<boolean | null>(null);
-  const [deviceInfo, setDeviceInfo] = useState<ReturnType<typeof getDeviceInfo> | null>(null);
+const ModelViewer = dynamic(
+  () => import("@/components/ModelViewer").then((mod) => mod.ModelViewer),
+  { ssr: false }
+);
+
+export default function Home() {
+  const [isMobile, setIsMobile] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    setDeviceInfo(getDeviceInfo());
-    isARSupported()
-      .then(setArReady)
-      .catch(() => setArReady(false));
+    const userAgent = navigator.userAgent;
+    const mobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    const ios = /iPhone|iPad|iPod/i.test(userAgent);
+    setIsMobile(mobile);
+    setIsIOS(ios);
   }, []);
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-8 px-4 py-8 sm:gap-12 sm:px-8 sm:py-16">
-      <section className="grid gap-8 rounded-2xl border border-white/40 bg-white/80 p-6 shadow-2xl backdrop-blur-xl sm:gap-10 sm:rounded-[32px] sm:p-10 lg:grid-cols-2">
-        <div className="flex flex-col gap-6 sm:gap-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500 sm:text-sm">Augmented Reality Preview</p>
+    <main className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="border-b border-black/10 bg-white px-4 py-4 sm:px-8">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl lg:text-5xl">See Our Sofa in Your Space</h1>
-            <p className="mt-3 text-base text-slate-600 sm:mt-4 sm:text-lg">{sofa.description}</p>
+            <h1 className="text-2xl font-bold text-black">AR Furniture</h1>
+            <p className="text-sm text-black/60">Try before you buy</p>
           </div>
-          <div className="flex flex-col gap-4 rounded-2xl border border-slate-100 bg-slate-50/80 p-4 sm:gap-6 sm:rounded-3xl sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+          <Link
+            href="/viewer"
+            className="rounded-full border border-black px-4 py-2 text-sm font-medium text-black transition hover:bg-black hover:text-white"
+          >
+            3D Viewer
+          </Link>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-8 sm:py-12">
+        <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+          {/* Left: Product Info */}
+          <div className="flex flex-col justify-center space-y-6">
             <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Price</p>
-              <p className="text-3xl font-semibold text-slate-900">${sofa.price.toLocaleString()}</p>
-            </div>
-            <div className="grid grid-cols-3 gap-4 text-center sm:flex sm:flex-col sm:gap-1 sm:text-left lg:flex-col">
-              <div className="rounded-lg bg-white/50 p-2 sm:p-0 sm:bg-transparent">
-                <p className="text-xs text-slate-500 sm:text-sm">Width</p>
-                <p className="text-lg font-semibold text-slate-900 sm:text-base">{sofa.dimensions.width} cm</p>
-              </div>
-              <div className="rounded-lg bg-white/50 p-2 sm:p-0 sm:bg-transparent">
-                <p className="text-xs text-slate-500 sm:text-sm">Depth</p>
-                <p className="text-lg font-semibold text-slate-900 sm:text-base">{sofa.dimensions.depth} cm</p>
-              </div>
-              <div className="rounded-lg bg-white/50 p-2 sm:p-0 sm:bg-transparent">
-                <p className="text-xs text-slate-500 sm:text-sm">Height</p>
-                <p className="text-lg font-semibold text-slate-900 sm:text-base">{sofa.dimensions.height} cm</p>
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
-            <Link
-              href={arReady ? "/ar" : deviceInfo?.isMobile ? "/ar" : "/viewer"}
-              className={`inline-flex h-12 flex-1 items-center justify-center rounded-full px-6 text-sm font-semibold text-white shadow-xl transition sm:h-14 sm:px-8 sm:text-base ${
-                arReady === false
-                  ? deviceInfo?.isDesktop
-                    ? "bg-orange-500 hover:bg-orange-600"
-                    : "bg-slate-400"
-                  : "bg-blue-500 hover:bg-blue-600"
-              }`}
-            >
-              {arReady === false
-                ? deviceInfo?.isDesktop
-                  ? "📱 Try on Mobile"
-                  : "AR Unavailable"
-                : "🎯 View in AR"}
-            </Link>
-            <Link
-              href="/viewer"
-              className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-slate-200 px-6 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:text-blue-600 sm:h-14 sm:px-8 sm:text-base"
-            >
-              👁️ View in 3D
-            </Link>
-          </div>
-          {arReady === false && deviceInfo && (
-            <div className="rounded-lg bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-700 mb-2">
-                {deviceInfo.isDesktop ? "🌐 Desktop Detected" : "📱 Mobile Device"}
+              <p className="text-sm font-medium uppercase tracking-wider text-black/40">
+                Modern Collection
               </p>
-              <p className="text-sm text-slate-600">{getARUnsupportedMessage()}</p>
-              {deviceInfo.isDesktop && (
-                <p className="text-sm text-slate-500 mt-2">
-                  💡 <strong>Tip:</strong> Scan the QR code below with your phone to try AR!
-                </p>
+              <h2 className="mt-2 text-4xl font-bold text-black sm:text-5xl">
+                {sofa.name}
+              </h2>
+              <p className="mt-4 text-lg text-black/70">{sofa.description}</p>
+            </div>
+
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-black">${sofa.price}</span>
+              <span className="text-sm text-black/60">+ free shipping</span>
+            </div>
+
+            {/* Features */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-xl border border-black/10 p-4">
+                <div className="text-2xl">📐</div>
+                <div className="mt-2 text-sm font-medium text-black">
+                  {formatDimensions(sofa.dimensions)}
+                </div>
+                <div className="text-xs text-black/60">Dimensions</div>
+              </div>
+              <div className="rounded-xl border border-black/10 p-4">
+                <div className="text-2xl">🎨</div>
+                <div className="mt-2 text-sm font-medium text-black">
+                  {sofa.material}
+                </div>
+                <div className="text-xs text-black/60">Material</div>
+              </div>
+              <div className="rounded-xl border border-black/10 p-4">
+                <div className="text-2xl">💺</div>
+                <div className="mt-2 text-sm font-medium text-black">3 Seater</div>
+                <div className="text-xs text-black/60">Capacity</div>
+              </div>
+              <div className="rounded-xl border border-black/10 p-4">
+                <div className="text-2xl">✨</div>
+                <div className="mt-2 text-sm font-medium text-black">Premium</div>
+                <div className="text-xs text-black/60">Quality</div>
+              </div>
+            </div>
+
+            {/* Device-specific AR info */}
+            {isMobile && (
+              <div className="rounded-xl border border-blue-500/20 bg-blue-50 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl">
+                    {isIOS ? "📱" : "🤖"}
+                  </div>
+                  <div>
+                    <p className="font-medium text-blue-900">
+                      AR Ready on {isIOS ? "iOS" : "Android"}!
+                    </p>
+                    <p className="mt-1 text-sm text-blue-700">
+                      {isIOS
+                        ? "Tap 'View in AR' to place the sofa in your space using AR Quick Look"
+                        : "Tap 'View in AR' to place the sofa in your space using Scene Viewer"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right: 3D Model Viewer */}
+          <div className="flex flex-col gap-4">
+            <div className="relative h-[500px] overflow-hidden rounded-3xl border border-black/10 bg-gradient-to-br from-slate-50 to-slate-100 shadow-lg">
+              <ModelViewer
+                src={sofa.modelPath}
+                iosSrc="/models/sofa.usdz"
+                alt={sofa.name}
+                autoRotate={true}
+                cameraControls={true}
+                ar={true}
+                arModes="webxr scene-viewer quick-look"
+                className="h-full w-full"
+              />
+            </div>
+
+            <div className="flex items-center justify-center gap-2 text-sm text-black/50">
+              {isMobile ? (
+                <>
+                  <span>👆 Touch to rotate</span>
+                  <span>•</span>
+                  <span>🤏 Pinch to zoom</span>
+                </>
+              ) : (
+                <>
+                  <span>🖱️ Click and drag to rotate</span>
+                  <span>•</span>
+                  <span>🔍 Scroll to zoom</span>
+                </>
               )}
             </div>
-          )}
-          <p className="text-sm uppercase tracking-[0.35em] text-slate-400">1 unit = 1 cm · Optimized for iOS + Android</p>
-        </div>
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-200 to-slate-100 p-4 sm:rounded-[28px] sm:p-6">
-          <div className="absolute inset-4 rounded-xl border border-white/60 bg-white/60 sm:inset-6 sm:rounded-[24px]" />
-          <div className="relative rounded-xl bg-white/90 p-3 shadow-2xl sm:rounded-[20px] sm:p-4">
-            <Image
-              src={sofa.thumbnail}
-              alt={sofa.name}
-              width={900}
-              height={600}
-              priority
-              className="h-full w-full rounded-2xl object-cover"
-            />
-          </div>
-          <div className="relative mt-4 rounded-xl bg-slate-900/80 p-3 text-white shadow-xl sm:mt-6 sm:rounded-2xl sm:p-4">
-            <p className="text-xs uppercase tracking-[0.4em] text-slate-200 sm:text-sm">Details</p>
-            <p className="mt-2 text-base font-semibold sm:text-lg">Modern 3-Seater Sofa</p>
-            <p className="text-xs text-slate-200 sm:text-sm">Perfect proportions for living rooms, lounges, and collaboration areas.</p>
           </div>
         </div>
       </section>
-      <section className="grid gap-4 rounded-2xl border border-white/60 bg-white/90 p-6 sm:gap-6 sm:rounded-3xl sm:p-8 lg:grid-cols-3">
-        {[
-          {
-            title: "True-to-scale",
-            detail: "The model follows centimeter units so what you see in AR matches real-world dimensions.",
-            icon: "📏",
-          },
-          {
-            title: "Gesture friendly",
-            detail: "Rotate, scale, and reposition with natural touch gestures optimized for mobile devices.",
-            icon: "👆",
-          },
-          {
-            title: "Instant fallback",
-            detail: "No AR? Jump into the interactive 3D viewer with OrbitControls and continue exploring.",
-            icon: "🔄",
-          },
-        ].map((item) => (
-          <div key={item.title} className="rounded-xl border border-slate-100 bg-slate-50/80 p-4 shadow-inner sm:rounded-2xl sm:p-6">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{item.icon}</span>
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">{item.title}</p>
+
+      {/* How it Works Section */}
+      <section className="bg-slate-50 py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8">
+          <h3 className="text-center text-3xl font-bold text-black">
+            How AR Works
+          </h3>
+          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+            <div className="rounded-2xl border border-black/10 bg-white p-6 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-black text-2xl text-white">
+                1
+              </div>
+              <h4 className="mt-4 font-semibold text-black">Tap View in AR</h4>
+              <p className="mt-2 text-sm text-black/70">
+                Click the AR button on the 3D model above
+              </p>
             </div>
-            <p className="mt-2 text-sm text-slate-600 sm:mt-3 sm:text-base">{item.detail}</p>
+            <div className="rounded-2xl border border-black/10 bg-white p-6 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-black text-2xl text-white">
+                2
+              </div>
+              <h4 className="mt-4 font-semibold text-black">
+                Point Your Camera
+              </h4>
+              <p className="mt-2 text-sm text-black/70">
+                Scan the floor where you want to place the sofa
+              </p>
+            </div>
+            <div className="rounded-2xl border border-black/10 bg-white p-6 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-black text-2xl text-white">
+                3
+              </div>
+              <h4 className="mt-4 font-semibold text-black">
+                See It in Your Space
+              </h4>
+              <p className="mt-2 text-sm text-black/70">
+                Move around to see the sofa from all angles
+              </p>
+            </div>
           </div>
-        ))}
+        </div>
       </section>
+
+      {/* Footer */}
+      <footer className="border-t border-black/10 bg-white py-8">
+        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-black/60 sm:px-8">
+          <p>AR Furniture Viewer • Built with Next.js & model-viewer</p>
+          <p className="mt-2">
+            {isIOS && "iOS AR Quick Look • "}
+            {!isIOS && isMobile && "Android Scene Viewer • "}
+            WebXR Compatible
+          </p>
+        </div>
+      </footer>
     </main>
   );
 }

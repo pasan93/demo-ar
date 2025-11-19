@@ -1,46 +1,104 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { sofa } from "@/lib/sofa-data";
-import { isARSupported } from "@/lib/webxr-utils";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { sofa, formatDimensions } from "@/lib/sofa-data";
 
-const SofaViewer = dynamic(() => import("@/components/SofaViewer").then((mod) => mod.SofaViewer), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-[70vh] items-center justify-center rounded-3xl border border-slate-200 bg-white">
-      <LoadingSpinner label="Preparing 3D viewer" />
-    </div>
-  ),
-});
+const ModelViewer = dynamic(
+  () => import("@/components/ModelViewer").then((mod) => mod.ModelViewer),
+  { ssr: false }
+);
 
 export default function ViewerPage() {
-  const [arReady, setArReady] = useState(false);
-  const router = useRouter();
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    isARSupported().then(setArReady).catch(() => setArReady(false));
+    const userAgent = navigator.userAgent;
+    const mobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    setIsMobile(mobile);
   }, []);
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-8 sm:py-10">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.4em] text-slate-400">Interactive 3D Viewer</p>
-          <h1 className="mt-1 text-2xl font-semibold text-slate-900 sm:mt-2 sm:text-3xl">{sofa.name}</h1>
-          <p className="text-xs text-slate-500 sm:text-sm">👆 Drag to rotate · 🤏 Pinch to zoom</p>
+    <main className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="border-b border-black/10 bg-white px-4 py-4 sm:px-8">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-black">3D Viewer</h1>
+            <p className="text-sm text-black/60">{sofa.name}</p>
+          </div>
+          <Link
+            href="/"
+            className="rounded-full border border-black px-4 py-2 text-sm font-medium text-black transition hover:bg-black hover:text-white"
+          >
+            ← Back
+          </Link>
         </div>
-        <Link
-          href="/"
-          className="inline-flex items-center justify-center rounded-full border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 sm:px-4 sm:py-2 sm:text-sm"
-        >
-          ← Back home
-        </Link>
-      </div>
-      <SofaViewer arSupported={arReady} onTryAR={() => router.push("/ar")} />
+      </header>
+
+      {/* Full Screen Viewer */}
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-8">
+        <div className="relative h-[80vh] overflow-hidden rounded-3xl border border-black/10 bg-gradient-to-br from-slate-50 via-white to-slate-100 shadow-2xl">
+          <ModelViewer
+            src={sofa.modelPath}
+            iosSrc="/models/sofa.usdz"
+            alt={sofa.name}
+            autoRotate={true}
+            cameraControls={true}
+            ar={true}
+            arModes="webxr scene-viewer quick-look"
+            className="h-full w-full"
+          />
+        </div>
+
+        <div className="mt-4 flex items-center justify-center gap-4 text-sm text-black/50">
+          {isMobile ? (
+            <>
+              <span>👆 Touch to rotate</span>
+              <span>•</span>
+              <span>🤏 Pinch to zoom</span>
+              <span>•</span>
+              <span>🎯 Tap AR button to view in your space</span>
+            </>
+          ) : (
+            <>
+              <span>🖱️ Click and drag to rotate</span>
+              <span>•</span>
+              <span>🔍 Scroll to zoom</span>
+              <span>•</span>
+              <span>📱 Open on mobile for AR</span>
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* Product Details */}
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-8">
+        <div className="rounded-2xl border border-black/10 bg-slate-50 p-6 sm:p-8">
+          <h2 className="text-2xl font-bold text-black">{sofa.name}</h2>
+          <p className="mt-2 text-black/70">{sofa.description}</p>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-4">
+            <div>
+              <p className="text-sm text-black/50">Price</p>
+              <p className="mt-1 text-xl font-bold text-black">${sofa.price}</p>
+            </div>
+            <div>
+              <p className="text-sm text-black/50">Dimensions</p>
+              <p className="mt-1 font-medium text-black">{formatDimensions(sofa.dimensions)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-black/50">Material</p>
+              <p className="mt-1 font-medium text-black">{sofa.material}</p>
+            </div>
+            <div>
+              <p className="text-sm text-black/50">Capacity</p>
+              <p className="mt-1 font-medium text-black">3 Seater</p>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

@@ -12,6 +12,7 @@ export type Sofa = {
   modelPath: string;
   thumbnail: string;
   description: string;
+  material: string;
 };
 
 export const sofa: Sofa = {
@@ -25,5 +26,10 @@ export const sofa: Sofa = {
   },
   modelPath: "/models/sofa.glb",
   thumbnail: "/images/sofa-thumbnail.jpg",
-  description: "Comfortable modern sofa with premium fabric",
+  description: "Comfortable modern sofa with premium fabric upholstery and solid wood frame",
+  material: "Premium Fabric",
 };
+
+export function formatDimensions(dimensions: SofaDimensions): string {
+  return `${dimensions.width} × ${dimensions.depth} × ${dimensions.height} cm`;
+}

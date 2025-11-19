@@ -1,36 +1,225 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AR Furniture Viewer
 
-## Getting Started
+A modern web application for viewing furniture in 3D and Augmented Reality, built with Next.js and Google's model-viewer.
 
-First, run the development server:
+## ✨ Features
+
+- 🎯 **Cross-Platform AR Support**
+  - iOS: Native AR Quick Look (requires USDZ)
+  - Android: Scene Viewer with ARCore
+  - Desktop: Interactive 3D viewer
+
+- 📱 **Mobile-Optimized**
+  - Touch gestures for rotation and zoom
+  - Responsive design
+  - Camera integration for AR
+
+- 🎨 **Modern UI**
+  - Clean, minimalist design
+  - Feather icons
+  - White background with black elements (Kiwi vibe)
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ and npm
+- Modern browser (Chrome, Safari, Firefox)
+- For AR: Mobile device with ARCore (Android) or iOS 15+
+
+### Installation
 
 ```bash
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build for production
+npm run build
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📱 Testing AR
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### On iOS (iPhone/iPad)
+1. Open the site in Safari
+2. Tap the "🎯 View in AR" button
+3. Allow camera permissions
+4. Point at a flat surface
+5. Tap to place the furniture
 
-## Learn More
+### On Android
+1. Open the site in Chrome
+2. Ensure ARCore is installed
+3. Tap the "🎯 View in AR" button
+4. Allow camera permissions
+5. Point at a flat surface
+6. Tap to place the furniture
 
-To learn more about Next.js, take a look at the following resources:
+### On Desktop
+- Use mouse to rotate and zoom the 3D model
+- Open on mobile for full AR experience
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📂 Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+ar-app/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx          # Home page with model viewer
+│   │   ├── viewer/
+│   │   │   └── page.tsx      # Full-screen 3D viewer
+│   │   ├── layout.tsx        # Root layout
+│   │   └── globals.css       # Global styles
+│   ├── components/
+│   │   └── ModelViewer.tsx   # Google model-viewer wrapper
+│   └── lib/
+│       └── sofa-data.ts      # Product data
+├── public/
+│   ├── models/
+│   │   ├── sofa.glb          # 3D model (62MB)
+│   │   └── sofa.usdz         # iOS AR model (convert from GLB)
+│   └── images/
+│       └── sofa-thumbnail.jpg
+└── scripts/
+    └── convert-to-usdz.sh    # Conversion helper script
+```
 
-## Deploy on Vercel
+## 🔄 Converting GLB to USDZ
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+For iOS AR support, you need to convert the GLB model to USDZ format:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Option 1: Using Reality Converter (Mac - Recommended)
+1. Download [Reality Converter](https://developer.apple.com/augmented-reality/tools/) from Apple
+2. Open the app and drag `public/models/sofa.glb` into it
+3. Export as `sofa.usdz` to `public/models/`
+
+### Option 2: Using Online Converters
+Run the conversion script which will open an online converter:
+```bash
+./scripts/convert-to-usdz.sh
+```
+
+Or manually visit:
+- [Meshy AI Converter](https://www.meshy.ai/3d-tools/file-converter/glb/to/usdz)
+- [iLove3DM](https://www.ilove3dm.com/glb-to-usdz)
+- [Vectary](https://app.vectary.com/3d-modeling-blog/usdz-converter-convert-usdz-files-online-with-vectary/)
+
+After conversion, save the file as `public/models/sofa.usdz`.
+
+## 🛠️ Technology Stack
+
+- **Framework:** Next.js 14 (App Router)
+- **3D/AR:** @google/model-viewer
+- **Styling:** Tailwind CSS 4
+- **Language:** TypeScript
+- **Deployment:** Vercel/Netlify ready
+
+## 📋 Browser Support
+
+| Feature | Chrome | Safari | Firefox | Edge |
+|---------|--------|--------|---------|------|
+| 3D Viewer | ✅ | ✅ | ✅ | ✅ |
+| AR (Mobile) | ✅ Android | ✅ iOS 15+ | ❌ | ✅ Android |
+
+## 🔧 Configuration
+
+### Adding New Models
+
+1. Add your GLB file to `public/models/`
+2. Convert to USDZ for iOS support
+3. Update `src/lib/sofa-data.ts`:
+
+```typescript
+export const sofa: Sofa = {
+  id: "your-model-id",
+  name: "Your Model Name",
+  price: 1299,
+  dimensions: { width: 210, depth: 90, height: 85 },
+  modelPath: "/models/your-model.glb",
+  thumbnail: "/images/your-thumbnail.jpg",
+  description: "Your model description",
+  material: "Material type",
+};
+```
+
+## 🚨 Important Notes
+
+- **HTTPS Required:** AR features require HTTPS or localhost
+- **File Size:** The GLB model is 62MB. Consider optimizing or using Git LFS
+- **Mobile Required:** AR features only work on mobile devices
+- **Camera Permissions:** Users must grant camera access for AR
+
+## 🌐 Deployment
+
+### Vercel (Recommended)
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel
+```
+
+### Netlify
+```bash
+# Build command
+npm run build
+
+# Publish directory
+.next
+```
+
+**Note:** Ensure HTTPS is enabled for AR features to work.
+
+## 📝 Development Notes
+
+- Model-viewer is loaded client-side only (SSR disabled)
+- Dynamic imports prevent server-side rendering issues
+- AR modes: `webxr scene-viewer quick-look`
+- Auto-rotation enabled by default
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test on both iOS and Android if modifying AR features
+5. Submit a pull request
+
+## 📄 License
+
+MIT License - feel free to use this project for your own furniture AR applications.
+
+## 🔗 Links
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [model-viewer Documentation](https://modelviewer.dev)
+- [AR Quick Look (iOS)](https://developer.apple.com/augmented-reality/quick-look/)
+- [Scene Viewer (Android)](https://developers.google.com/ar/develop/scene-viewer)
+
+## 🐛 Troubleshooting
+
+### AR not working on iOS
+- Ensure you're using Safari browser
+- Check that the USDZ file exists in `public/models/`
+- Verify iOS version is 15 or higher
+- Allow camera permissions when prompted
+
+### AR not working on Android
+- Ensure Chrome browser is up to date
+- Check that ARCore is installed and updated
+- Allow camera permissions when prompted
+
+### 3D model not loading
+- Check browser console for errors
+- Verify GLB file path is correct
+- Ensure file size isn't causing timeout issues
+
+---
+
+Built with ❤️ using Next.js and model-viewer
