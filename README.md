@@ -81,8 +81,8 @@ ar-app/
 │       └── sofa-data.ts      # Product data
 ├── public/
 │   ├── models/
-│   │   ├── sofa.glb          # 3D model (62MB)
-│   │   └── sofa.usdz         # iOS AR model (convert from GLB)
+│   │   ├── sofa.glb          # 3D model (22MB compressed)
+│   │   └── sofa.usdz         # iOS AR model (30MB compressed)
 │   └── images/
 │       └── sofa-thumbnail.jpg
 └── scripts/
@@ -155,6 +155,13 @@ export const sofa: Sofa = {
 - **Camera Permissions:** Users must grant camera access for AR
 
 ## 🌐 Deployment
+
+### 3D Model Hosting
+The 3D models are served via **GitHub Raw URLs** to work around Vercel's Git LFS limitations. This ensures:
+- ✅ Fast loading on all platforms
+- ✅ No additional storage costs
+- ✅ Automatic HTTPS and CORS headers
+- ✅ Reliable CDN distribution
 
 ### Vercel (Recommended)
 ```bash
