@@ -12,6 +12,7 @@ interface ModelViewerProps {
   ar?: boolean;
   arModes?: string;
   className?: string;
+  poster?: string;
 }
 
 declare global {
@@ -51,23 +52,27 @@ export function ModelViewer({
   ar = true,
   arModes = "webxr scene-viewer quick-look",
   className = "",
+  poster,
 }: ModelViewerProps) {
   const viewerRef = useRef<HTMLElement>(null);
   const [isIOS, setIsIOS] = useState(false);
+  const [isModelLoaded, setIsModelLoaded] = useState(false);
 
   useEffect(() => {
     // Detect iOS
     const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     setIsIOS(iOS);
 
-    // Log when model is loaded
+    // Handle model loading states
     const viewer = viewerRef.current as any;
     if (viewer) {
       viewer.addEventListener("load", () => {
         console.log("Model loaded successfully");
+        setIsModelLoaded(true);
       });
       viewer.addEventListener("error", (event: any) => {
         console.error("Model loading error:", event);
+        setIsModelLoaded(false);
       });
       viewer.addEventListener("ar-status", (event: any) => {
         console.log("AR status:", event.detail);
@@ -76,34 +81,53 @@ export function ModelViewer({
   }, []);
 
   return (
-    <model-viewer
-      ref={viewerRef}
-      src={src}
-      ios-src={iosSrc}
-      alt={alt}
-      auto-rotate={autoRotate}
-      camera-controls={cameraControls}
-      ar={ar}
-      ar-modes={arModes}
-      ar-scale="auto"
-      ar-placement="floor"
-      xr-environment={true}
-      shadow-intensity="1"
-      exposure="1"
-      environment-image="neutral"
-      loading="eager"
-      reveal="auto"
-      className={className}
-      style={{
-        width: "100%",
-        height: "100%",
-        background: "transparent",
-      }}
-    >
-      {/* Native iOS AR Quick Look link for better iOS compatibility */}
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <model-viewer
+        ref={viewerRef}
+        src={src}
+        ios-src={iosSrc}
+        alt={alt}
+        auto-rotate={autoRotate}
+        camera-controls={cameraControls}
+        ar={ar}
+        ar-modes={arModes}
+        ar-scale="auto"
+        ar-placement="floor"
+        xr-environment={true}
+        shadow-intensity="1"
+        exposure="1"
+        environment-image="neutral"
+        loading="eager"
+        reveal="auto"
+        poster={poster}
+        className={className}
+        style={{
+          width: "100%",
+          height: "100%",
+          background: "transparent",
+        }}
+      >
+
+        {!isModelLoaded && (
+          <div
+            slot="progress-bar"
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              fontSize: "14px",
+              color: "#333",
+            }}
+          >
+            Loading 3D model...
+          </div>
+        )}
+      </model-viewer>
+
+      {/* AR button positioned outside model-viewer */}
       {isIOS && iosSrc ? (
         <a
-          slot="ar-button"
           rel="ar"
           href={iosSrc}
           style={{
@@ -124,47 +148,36 @@ export function ModelViewer({
           }}
         >
           🎯 View in AR
-          <img />
         </a>
       ) : (
-        <div slot="ar-button" className="ar-button-container">
-          <button
-            className="ar-button"
-            style={{
-              position: "absolute",
-              bottom: "16px",
-              right: "16px",
-              padding: "12px 24px",
-              backgroundColor: "#007AFF",
-              color: "white",
-              border: "none",
-              borderRadius: "24px",
-              fontSize: "16px",
-              fontWeight: "600",
-              cursor: "pointer",
-              boxShadow: "0 4px 12px rgba(0, 122, 255, 0.4)",
-              zIndex: 10,
-            }}
-          >
-            🎯 View in AR
-          </button>
-        </div>
+        <button
+          style={{
+            position: "absolute",
+            bottom: "16px",
+            right: "16px",
+            padding: "12px 24px",
+            backgroundColor: "#007AFF",
+            color: "white",
+            border: "none",
+            borderRadius: "24px",
+            fontSize: "16px",
+            fontWeight: "600",
+            cursor: "pointer",
+            boxShadow: "0 4px 12px rgba(0, 122, 255, 0.4)",
+            zIndex: 10,
+          }}
+          onClick={() => {
+            // Trigger AR on Android
+            const viewer = viewerRef.current as any;
+            if (viewer && viewer.activateAR) {
+              viewer.activateAR();
+            }
+          }}
+        >
+          🎯 View in AR
+        </button>
       )}
-      
-      <div
-        slot="progress-bar"
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          fontSize: "14px",
-          color: "#333",
-        }}
-      >
-        Loading 3D model...
-      </div>
-    </model-viewer>
+    </div>
   );
 }
 

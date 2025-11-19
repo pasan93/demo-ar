@@ -121,6 +121,7 @@ export default function Home() {
                 cameraControls={true}
                 ar={true}
                 arModes="webxr scene-viewer quick-look"
+                poster={sofa.thumbnail}
                 className="h-full w-full"
               />
             </div>
