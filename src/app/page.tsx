@@ -115,7 +115,7 @@ export default function Home() {
             <div className="relative h-[500px] overflow-hidden rounded-3xl border border-black/10 bg-gradient-to-br from-slate-50 to-slate-100 shadow-lg">
               <ModelViewer
                 src={sofa.modelPath}
-                iosSrc="/models/sofa.usdz"
+                iosSrc="https://raw.githubusercontent.com/pasan93/demo-ar/main/public/models/sofa.usdz"
                 alt={sofa.name}
                 autoRotate={true}
                 cameraControls={true}
