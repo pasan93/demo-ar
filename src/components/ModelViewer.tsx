@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "@google/model-viewer";
 
 interface ModelViewerProps {
@@ -33,6 +33,8 @@ declare global {
           loading?: string;
           "reveal"?: string;
           "ar-scale"?: string;
+          "ar-placement"?: string;
+          "xr-environment"?: boolean;
         },
         HTMLElement
       >;
@@ -51,8 +53,13 @@ export function ModelViewer({
   className = "",
 }: ModelViewerProps) {
   const viewerRef = useRef<HTMLElement>(null);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
+    // Detect iOS
+    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    setIsIOS(iOS);
+
     // Log when model is loaded
     const viewer = viewerRef.current as any;
     if (viewer) {
@@ -61,6 +68,9 @@ export function ModelViewer({
       });
       viewer.addEventListener("error", (event: any) => {
         console.error("Model loading error:", event);
+      });
+      viewer.addEventListener("ar-status", (event: any) => {
+        console.log("AR status:", event.detail);
       });
     }
   }, []);
@@ -75,12 +85,14 @@ export function ModelViewer({
       camera-controls={cameraControls}
       ar={ar}
       ar-modes={arModes}
+      ar-scale="auto"
+      ar-placement="floor"
+      xr-environment={true}
       shadow-intensity="1"
       exposure="1"
       environment-image="neutral"
       loading="eager"
       reveal="auto"
-      ar-scale="auto"
       className={className}
       style={{
         width: "100%",
@@ -88,9 +100,12 @@ export function ModelViewer({
         background: "transparent",
       }}
     >
-      <div slot="ar-button" className="ar-button-container">
-        <button
-          className="ar-button"
+      {/* Native iOS AR Quick Look link for better iOS compatibility */}
+      {isIOS && iosSrc ? (
+        <a
+          slot="ar-button"
+          rel="ar"
+          href={iosSrc}
           style={{
             position: "absolute",
             bottom: "16px",
@@ -102,14 +117,39 @@ export function ModelViewer({
             borderRadius: "24px",
             fontSize: "16px",
             fontWeight: "600",
-            cursor: "pointer",
+            textDecoration: "none",
+            display: "inline-block",
             boxShadow: "0 4px 12px rgba(0, 122, 255, 0.4)",
             zIndex: 10,
           }}
         >
           🎯 View in AR
-        </button>
-      </div>
+          <img />
+        </a>
+      ) : (
+        <div slot="ar-button" className="ar-button-container">
+          <button
+            className="ar-button"
+            style={{
+              position: "absolute",
+              bottom: "16px",
+              right: "16px",
+              padding: "12px 24px",
+              backgroundColor: "#007AFF",
+              color: "white",
+              border: "none",
+              borderRadius: "24px",
+              fontSize: "16px",
+              fontWeight: "600",
+              cursor: "pointer",
+              boxShadow: "0 4px 12px rgba(0, 122, 255, 0.4)",
+              zIndex: 10,
+            }}
+          >
+            🎯 View in AR
+          </button>
+        </div>
+      )}
       
       <div
         slot="progress-bar"
