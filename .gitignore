@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 3D models (hosted separately via GitHub Raw URLs)
+public/models/*.glb
+public/models/*.usdz
+public/models/*.obj
