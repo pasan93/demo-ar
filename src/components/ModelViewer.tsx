@@ -66,7 +66,12 @@ export function ModelViewer({
 
     // Construct absolute URL for iOS AR
     if (iOS && iosSrc) {
-      const absoluteUrl = new URL(iosSrc, window.location.origin).href;
+      // Use the current deployment URL for Vercel compatibility
+      const baseUrl = window.location.origin.includes('vercel.app')
+        ? window.location.origin
+        : 'https://demo-ar-smoky.vercel.app';
+      const absoluteUrl = new URL(iosSrc, baseUrl).href;
+      console.log("iOS AR URL constructed:", absoluteUrl, "from iosSrc:", iosSrc, "baseUrl:", baseUrl);
       setAbsoluteIosSrc(absoluteUrl);
     }
 
