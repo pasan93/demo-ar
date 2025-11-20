@@ -66,12 +66,12 @@ export function ModelViewer({
 
     // Construct absolute URL for iOS AR
     if (iOS && iosSrc) {
-      // Use the current deployment URL for Vercel compatibility
-      const baseUrl = window.location.origin.includes('vercel.app')
+      // For Vercel deployments, use the known deployment URL
+      const baseUrl = window.location.hostname.includes('vercel.app')
         ? window.location.origin
-        : 'https://demo-ar-smoky.vercel.app';
+        : window.location.origin; // fallback for local development
       const absoluteUrl = new URL(iosSrc, baseUrl).href;
-      console.log("iOS AR URL constructed:", absoluteUrl, "from iosSrc:", iosSrc, "baseUrl:", baseUrl);
+      console.log("iOS AR URL:", absoluteUrl, "UserAgent iOS:", iOS, "Origin:", window.location.origin);
       setAbsoluteIosSrc(absoluteUrl);
     }
 
@@ -141,7 +141,7 @@ export function ModelViewer({
         gap: "8px",
         zIndex: 10,
       }}>
-        {isIOS && absoluteIosSrc && (
+        {absoluteIosSrc && (
           <a
             rel="ar"
             href={absoluteIosSrc}
@@ -158,8 +158,9 @@ export function ModelViewer({
               boxShadow: "0 4px 12px rgba(0, 122, 255, 0.4)",
               textAlign: "center",
             }}
+            onClick={() => console.log("Quick Look AR clicked, URL:", absoluteIosSrc)}
           >
-            📱 Quick Look AR
+            📱 Quick Look AR ({isIOS ? 'iOS' : 'Test'})
           </a>
         )}
         <button
