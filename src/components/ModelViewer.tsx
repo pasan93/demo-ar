@@ -85,44 +85,25 @@ export function ModelViewer({
       <model-viewer
         ref={viewerRef}
         src={src}
-        ios-src={iosSrc}
         alt={alt}
         auto-rotate={autoRotate}
         camera-controls={cameraControls}
-        ar={ar}
-        ar-modes={arModes}
-        ar-scale="auto"
-        ar-placement="floor"
-        xr-environment={true}
-        shadow-intensity="1"
-        exposure="1"
-        environment-image="neutral"
-        loading="eager"
-        reveal="auto"
-        poster={poster}
-        className={className}
         style={{
           width: "100%",
           height: "100%",
           background: "transparent",
         }}
       >
-
-        {!isModelLoaded && (
-          <div
-            slot="progress-bar"
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              fontSize: "14px",
-              color: "#333",
-            }}
-          >
-            Loading 3D model...
-          </div>
-        )}
+        <div slot="progress-bar" style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          fontSize: "14px",
+          color: "#333",
+        }}>
+          Loading 3D model...
+        </div>
       </model-viewer>
 
       {/* AR button positioned outside model-viewer */}

@@ -7,7 +7,17 @@ import { sofa, formatDimensions } from "@/lib/sofa-data";
 
 const ModelViewer = dynamic(
   () => import("@/components/ModelViewer").then((mod) => mod.ModelViewer),
-  { ssr: false }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-full w-full bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center rounded-3xl">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading 3D Viewer...</p>
+        </div>
+      </div>
+    )
+  }
 );
 
 export default function Home() {
