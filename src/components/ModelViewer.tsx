@@ -57,52 +57,103 @@ export function ModelViewer({
   const viewerRef = useRef<HTMLElement>(null);
   const [isIOS, setIsIOS] = useState(false);
   const [isModelLoaded, setIsModelLoaded] = useState(false);
-  const [absoluteIosSrc, setAbsoluteIosSrc] = useState<string>("");
+  const [resolvedIosSrc, setResolvedIosSrc] = useState<string | undefined>(iosSrc);
+  const [iosAssetStatus, setIosAssetStatus] = useState<"idle" | "checking" | "ok" | "error">("idle");
 
   useEffect(() => {
-    // Detect iOS
-    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (typeof window === "undefined") return;
+
+    const userAgent = window.navigator.userAgent;
+    const iOS = /iPad|iPhone|iPod/.test(userAgent);
     setIsIOS(iOS);
 
-    // Construct absolute URL for iOS AR
-    if (iOS && iosSrc) {
-      // For Vercel deployments, use the known deployment URL
-      const baseUrl = window.location.hostname.includes('vercel.app')
-        ? window.location.origin
-        : window.location.origin; // fallback for local development
-      const absoluteUrl = new URL(iosSrc, baseUrl).href;
-      console.log("iOS AR URL:", absoluteUrl, "UserAgent iOS:", iOS, "Origin:", window.location.origin);
-      setAbsoluteIosSrc(absoluteUrl);
+    if (!iosSrc) {
+      setResolvedIosSrc(undefined);
+      return;
     }
 
-    // Handle model loading states
-    const viewer = viewerRef.current as any;
-    if (viewer) {
-      viewer.addEventListener("load", () => {
-        console.log("Model loaded successfully");
-        setIsModelLoaded(true);
-      });
-      viewer.addEventListener("error", (event: any) => {
-        console.error("Model loading error:", event);
-        setIsModelLoaded(false);
-      });
-      viewer.addEventListener("ar-status", (event: any) => {
-        console.log("AR status:", event.detail);
-      });
+    try {
+      const absoluteUrl = iosSrc.startsWith("http")
+        ? iosSrc
+        : new URL(iosSrc, window.location.origin).href;
+      console.log("iOS AR URL:", absoluteUrl, "UserAgent iOS:", iOS, "Origin:", window.location.origin);
+      setResolvedIosSrc(absoluteUrl);
+    } catch (error) {
+      console.error("Unable to resolve iosSrc into an absolute URL", error);
+      setResolvedIosSrc(iosSrc);
     }
   }, [iosSrc]);
+
+  useEffect(() => {
+    const viewer = viewerRef.current as any;
+    if (!viewer) return;
+
+    const handleLoad = () => {
+      console.log("Model loaded successfully");
+      setIsModelLoaded(true);
+    };
+    const handleError = (event: any) => {
+      console.error("Model loading error:", event);
+      setIsModelLoaded(false);
+    };
+    const handleArStatus = (event: any) => {
+      console.log("AR status:", event.detail);
+    };
+
+    viewer.addEventListener("load", handleLoad);
+    viewer.addEventListener("error", handleError);
+    viewer.addEventListener("ar-status", handleArStatus);
+
+    return () => {
+      viewer.removeEventListener("load", handleLoad);
+      viewer.removeEventListener("error", handleError);
+      viewer.removeEventListener("ar-status", handleArStatus);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!resolvedIosSrc || !resolvedIosSrc.startsWith("http")) {
+      setIosAssetStatus(resolvedIosSrc ? "ok" : "idle");
+      return;
+    }
+
+    const controller = new AbortController();
+    setIosAssetStatus("checking");
+
+    fetch(resolvedIosSrc, { method: "HEAD", signal: controller.signal })
+      .then((response) => {
+        if (response.ok) {
+          console.log("USDZ asset reachable:", resolvedIosSrc);
+          setIosAssetStatus("ok");
+        } else {
+          console.warn("USDZ asset request failed:", resolvedIosSrc, response.status);
+          setIosAssetStatus("error");
+        }
+      })
+      .catch((error) => {
+        if (controller.signal.aborted) return;
+        console.error("Unable to reach USDZ asset:", resolvedIosSrc, error);
+        setIosAssetStatus("error");
+      });
+
+    return () => controller.abort();
+  }, [resolvedIosSrc]);
+
+  const iosArHref = resolvedIosSrc || iosSrc;
+  const downloadFileName =
+    (iosSrc ?? "").split("/").filter(Boolean).pop() ?? "model.usdz";
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <model-viewer
         ref={viewerRef}
         src={src}
-        ios-src={iosSrc}
+        ios-src={iosArHref}
         alt={alt}
         auto-rotate={autoRotate}
         camera-controls={cameraControls}
-        ar={true}
-        ar-modes="webxr scene-viewer quick-look"
+        ar={ar}
+        ar-modes={arModes}
         ar-scale="auto"
         ar-placement="floor"
         xr-environment={true}
@@ -141,11 +192,11 @@ export function ModelViewer({
         gap: "8px",
         zIndex: 10,
       }}>
-        {absoluteIosSrc && (
+        {iosArHref && (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             <a
               rel="ar"
-              href={absoluteIosSrc}
+              href={iosArHref}
               style={{
                 padding: "10px 16px",
                 backgroundColor: "#007AFF",
@@ -159,13 +210,13 @@ export function ModelViewer({
                 boxShadow: "0 4px 12px rgba(0, 122, 255, 0.4)",
                 textAlign: "center",
               }}
-              onClick={() => console.log("Quick Look AR clicked, URL:", absoluteIosSrc)}
+              onClick={() => console.log("Quick Look AR clicked, URL:", iosArHref)}
             >
               📱 Quick Look AR ({isIOS ? 'iOS' : 'Test'})
             </a>
             <a
-              href={absoluteIosSrc}
-              download="sofa.usdz"
+              href={iosArHref}
+              download={downloadFileName}
               style={{
                 padding: "8px 12px",
                 backgroundColor: "#6B7280",
@@ -182,6 +233,18 @@ export function ModelViewer({
               ⬇️ Download USDZ
             </a>
           </div>
+        )}
+        {iosArHref && iosAssetStatus === "error" && (
+          <span
+            style={{
+              fontSize: "12px",
+              color: "#DC2626",
+              textAlign: "right",
+              maxWidth: "240px",
+            }}
+          >
+            USDZ file can&apos;t be reached. Check file path & MIME headers.
+          </span>
         )}
         <button
           style={{
@@ -211,4 +274,3 @@ export function ModelViewer({
     </div>
   );
 }
-

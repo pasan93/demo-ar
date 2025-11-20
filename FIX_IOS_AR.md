@@ -80,14 +80,13 @@ mv sofa-optimized.usdz public/models/sofa.usdz
    - Download Settings > Select USDZ
    - Download optimized version
 
-#### Option 3: Use Smaller Test File Temporarily
+#### Option 3: Use Apple’s Hosted Sample Temporarily
 
-```bash
-# Use the Apple sample for now
-cp public/models/test-chair.usdz public/models/sofa-backup.usdz
-```
+Point your `iosSrc` (or the `/test-ar` page link) to Apple&apos;s known-good USDZ file:
 
-Then update the code to use test file temporarily to verify everything else works.
+- `https://developer.apple.com/augmented-reality/quick-look/models/teapot/teapot.usdz`
+
+If that loads, Quick Look and your headers are correct—the issue is with your custom USDZ payload.
 
 ---
 
@@ -179,7 +178,7 @@ If model.usda is > 50MB, it's probably too complex.
 ## Testing Checklist
 
 - [ ] Test page works: `http://localhost:3000/test-ar`
-- [ ] Apple sample (test-chair.usdz) loads in AR
+- [ ] Apple sample (teapot.usdz) loads in AR
 - [ ] Using Safari on iPhone (not Chrome)
 - [ ] iOS 15 or higher
 - [ ] Camera permissions granted
@@ -243,4 +242,3 @@ Create an issue with:
 ---
 
 **Next Step:** Go to http://YOUR_IP:3000/test-ar and test!
-

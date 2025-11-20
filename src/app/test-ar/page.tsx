@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+const APPLE_SAMPLE_URL = "https://developer.apple.com/augmented-reality/quick-look/models/teapot/teapot.usdz";
+
 export default function TestARPage() {
   return (
     <main className="min-h-screen bg-white p-8">
@@ -31,12 +33,12 @@ export default function TestARPage() {
           <div className="rounded-lg border border-green-200 bg-green-50 p-6">
             <h2 className="text-xl font-semibold mb-4">Test 2: Apple Sample (Teacup)</h2>
             <p className="text-gray-600 mb-4">
-              This uses Apple's official sample USDZ file (32KB). If this works, 
+              This links directly to Apple&apos;s official sample USDZ file (hosted on developer.apple.com). If this opens, 
               AR Quick Look is functional and the issue is with the sofa USDZ file.
             </p>
             <a
               rel="ar"
-              href="/models/test-chair.usdz"
+              href={APPLE_SAMPLE_URL}
               className="inline-block rounded-lg bg-green-600 px-6 py-3 text-white font-semibold"
             >
               🧪 Test with Apple Sample
@@ -115,4 +117,3 @@ export default function TestARPage() {
     </main>
   );
 }
-
