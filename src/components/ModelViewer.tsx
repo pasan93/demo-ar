@@ -142,26 +142,46 @@ export function ModelViewer({
         zIndex: 10,
       }}>
         {absoluteIosSrc && (
-          <a
-            rel="ar"
-            href={absoluteIosSrc}
-            style={{
-              padding: "10px 16px",
-              backgroundColor: "#007AFF",
-              color: "white",
-              border: "none",
-              borderRadius: "20px",
-              fontSize: "14px",
-              fontWeight: "600",
-              textDecoration: "none",
-              display: "inline-block",
-              boxShadow: "0 4px 12px rgba(0, 122, 255, 0.4)",
-              textAlign: "center",
-            }}
-            onClick={() => console.log("Quick Look AR clicked, URL:", absoluteIosSrc)}
-          >
-            📱 Quick Look AR ({isIOS ? 'iOS' : 'Test'})
-          </a>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <a
+              rel="ar"
+              href={absoluteIosSrc}
+              style={{
+                padding: "10px 16px",
+                backgroundColor: "#007AFF",
+                color: "white",
+                border: "none",
+                borderRadius: "20px",
+                fontSize: "14px",
+                fontWeight: "600",
+                textDecoration: "none",
+                display: "inline-block",
+                boxShadow: "0 4px 12px rgba(0, 122, 255, 0.4)",
+                textAlign: "center",
+              }}
+              onClick={() => console.log("Quick Look AR clicked, URL:", absoluteIosSrc)}
+            >
+              📱 Quick Look AR ({isIOS ? 'iOS' : 'Test'})
+            </a>
+            <a
+              href={absoluteIosSrc}
+              download="sofa.usdz"
+              style={{
+                padding: "8px 12px",
+                backgroundColor: "#6B7280",
+                color: "white",
+                border: "none",
+                borderRadius: "16px",
+                fontSize: "12px",
+                fontWeight: "500",
+                textDecoration: "none",
+                display: "inline-block",
+                textAlign: "center",
+              }}
+            >
+              ⬇️ Download USDZ
+            </a>
+          </div>
         )}
         <button
           style={{
