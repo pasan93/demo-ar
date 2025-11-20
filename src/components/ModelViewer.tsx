@@ -57,11 +57,18 @@ export function ModelViewer({
   const viewerRef = useRef<HTMLElement>(null);
   const [isIOS, setIsIOS] = useState(false);
   const [isModelLoaded, setIsModelLoaded] = useState(false);
+  const [absoluteIosSrc, setAbsoluteIosSrc] = useState<string>("");
 
   useEffect(() => {
     // Detect iOS
     const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     setIsIOS(iOS);
+
+    // Construct absolute URL for iOS AR
+    if (iOS && iosSrc) {
+      const absoluteUrl = new URL(iosSrc, window.location.origin).href;
+      setAbsoluteIosSrc(absoluteUrl);
+    }
 
     // Handle model loading states
     const viewer = viewerRef.current as any;
@@ -78,7 +85,7 @@ export function ModelViewer({
         console.log("AR status:", event.detail);
       });
     }
-  }, []);
+  }, [iosSrc]);
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -107,10 +114,10 @@ export function ModelViewer({
       </model-viewer>
 
       {/* AR button positioned outside model-viewer */}
-      {isIOS && iosSrc ? (
+      {isIOS && absoluteIosSrc ? (
         <a
           rel="ar"
-          href={iosSrc}
+          href={absoluteIosSrc}
           style={{
             position: "absolute",
             bottom: "16px",
