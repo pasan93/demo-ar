@@ -24,7 +24,7 @@ export const sofa: Sofa = {
     depth: 90,
     height: 85,
   },
-  modelPath: "https://raw.githubusercontent.com/pasan93/demo-ar/main/public/models/sofa.glb",
+  modelPath: "/models/sofa.glb",
   thumbnail: "/images/sofa-thumbnail.jpg",
   description: "Comfortable modern sofa with premium fabric upholstery and solid wood frame",
   material: "Premium Fabric",
