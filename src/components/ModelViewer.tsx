@@ -92,9 +92,22 @@ export function ModelViewer({
       <model-viewer
         ref={viewerRef}
         src={src}
+        ios-src={iosSrc}
         alt={alt}
         auto-rotate={autoRotate}
         camera-controls={cameraControls}
+        ar={true}
+        ar-modes="webxr scene-viewer quick-look"
+        ar-scale="auto"
+        ar-placement="floor"
+        xr-environment={true}
+        shadow-intensity="1"
+        exposure="1"
+        environment-image="neutral"
+        loading="eager"
+        reveal="auto"
+        poster={poster}
+        className={className}
         style={{
           width: "100%",
           height: "100%",
@@ -113,58 +126,62 @@ export function ModelViewer({
         </div>
       </model-viewer>
 
-      {/* AR button positioned outside model-viewer */}
-      {isIOS && absoluteIosSrc ? (
-        <a
-          rel="ar"
-          href={absoluteIosSrc}
-          style={{
-            position: "absolute",
-            bottom: "16px",
-            right: "16px",
-            padding: "12px 24px",
-            backgroundColor: "#007AFF",
-            color: "white",
-            border: "none",
-            borderRadius: "24px",
-            fontSize: "16px",
-            fontWeight: "600",
-            textDecoration: "none",
-            display: "inline-block",
-            boxShadow: "0 4px 12px rgba(0, 122, 255, 0.4)",
-            zIndex: 10,
-          }}
-        >
-          🎯 View in AR
-        </a>
-      ) : (
+      {/* AR/VR buttons - Multiple options for iOS users */}
+      <div style={{
+        position: "absolute",
+        bottom: "16px",
+        right: "16px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+        zIndex: 10,
+      }}>
+        {isIOS && absoluteIosSrc && (
+          <a
+            rel="ar"
+            href={absoluteIosSrc}
+            style={{
+              padding: "10px 16px",
+              backgroundColor: "#007AFF",
+              color: "white",
+              border: "none",
+              borderRadius: "20px",
+              fontSize: "14px",
+              fontWeight: "600",
+              textDecoration: "none",
+              display: "inline-block",
+              boxShadow: "0 4px 12px rgba(0, 122, 255, 0.4)",
+              textAlign: "center",
+            }}
+          >
+            📱 Quick Look AR
+          </a>
+        )}
         <button
           style={{
-            position: "absolute",
-            bottom: "16px",
-            right: "16px",
-            padding: "12px 24px",
-            backgroundColor: "#007AFF",
+            padding: "10px 16px",
+            backgroundColor: isIOS ? "#34C759" : "#007AFF",
             color: "white",
             border: "none",
-            borderRadius: "24px",
-            fontSize: "16px",
+            borderRadius: "20px",
+            fontSize: "14px",
             fontWeight: "600",
             cursor: "pointer",
-            boxShadow: "0 4px 12px rgba(0, 122, 255, 0.4)",
-            zIndex: 10,
+            boxShadow: isIOS
+              ? "0 4px 12px rgba(52, 199, 89, 0.4)"
+              : "0 4px 12px rgba(0, 122, 255, 0.4)",
           }}
           onClick={() => {
-            // Trigger AR on Android
+            // Trigger WebXR AR/VR
             const viewer = viewerRef.current as any;
             if (viewer && viewer.activateAR) {
               viewer.activateAR();
             }
           }}
         >
-          🎯 View in AR
+          {isIOS ? "🕶️ WebXR VR/AR" : "🎯 View in AR"}
         </button>
-      )}
+      </div>
     </div>
   );
 }
